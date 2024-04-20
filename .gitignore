@@ -1,6 +1,3 @@
 # Bỏ qua các tập tin và thư mục model
-models/
-*.h5
-*.pth
-*.pkl
-*.ckpt
+models
+logs
