@@ -6,6 +6,7 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Load model
+
 model = load_model("imageclassifier3_with_history.keras")
 classes = ['Bengin', 'Malignant', 'Normal']
 
