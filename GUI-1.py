@@ -10,12 +10,8 @@ from pathlib import Path
 from keras.models import load_model
 
 class AnotherWindow(QWidget):
-    def __init__(self, model1, model2, model3):
+    def __init__(self):
         super().__init__()
-
-        self.model1 = model1
-        self.model2 = model2
-        self.model3 = model3
 
         self.setWindowTitle("Lung cancer detector")
         self.setFixedSize(QSize(1418, 747))
@@ -80,6 +76,11 @@ class AnotherWindow(QWidget):
         # Đặt tỷ lệ co giãn cho hai phần bằng nhau
         self.main_layout.setStretch(0, 1)  # Phần bên trái
         self.main_layout.setStretch(1, 1)  # Phần bên phải
+
+        # Load models once when the window is initialized
+        self.model1 = load_model('models/imageclassifier1.keras')
+        self.model2 = load_model('models/imageclassifier2.keras')
+        self.model3 = load_model('models/imageclassifier3.keras')
 
     def get_image_from_file(self):
         dialog = QFileDialog(self)
@@ -155,23 +156,25 @@ class AnotherWindow(QWidget):
         return min_index
 
 class MainWindow(QMainWindow):
+#Lớp này đại diện cho cửa sổ chính ba đầu của ứng dụng
+#trong lớp này, mọt hình ảnh của phổi (là hình ảnh mẫu) được hiển thị
     def __init__(self):
-        super(MainWindow, self).__init__()
-
+        super(MainWindow,self).__init__()
+    
         self.setWindowTitle("Lung cancer detector")
         self.setFixedSize(QSize(1418, 747))
 
         # creating label
         self.label = QLabel(self)
-
+         
         # loading image
         self.pixmap = QPixmap('lung.png')
-
+ 
         # adding image to label
         self.label.setPixmap(self.pixmap)
-
+ 
         # Optional, resize label to image size
-        self.label.resize(1440, 761)
+        self.label.resize(1440,761)
 
         self.Main = QWidget(self)
         self.Main.setGeometry(150, 10, 1000, 750)
@@ -181,18 +184,23 @@ class MainWindow(QMainWindow):
         #nút "Start" để mở cửa sổ khác 'AnotherWindow' khi được nhấn
         #khi người dùng nhấn vào nút "Start", một cửa sổ mới sẽ hiển thị, cho phép họ thêm hình ảnh và thực hiện dự đoán
         self.button.setCheckable(True)
-        self.button.setGeometry(150, 50, 600, 400)
+        self.button.setGeometry(150,50,600,400)
         self.button.clicked.connect(self.show_new_window)
-        self.button.setFixedSize(150, 40)
+        self.button.setFixedSize(150,40)
         self.Main_Layout.addWidget(self.button)
 
+        
+        #tên app
+        # Tạo một QWidget làm vùng hiển thị chính
+    
+        
         # Tạo QLabel và đặt các thuộc tính
         widget = QLabel("Lung cancer detector", self.Main)
         font = widget.font()
         font.setPointSize(60)
         font.setBold(True)  # Đặt chữ in đậm
         widget.setFont(font)
-
+        
         # Đặt màu chữ và đổ bóng bằng cách sử dụng CSS
         widget.setStyleSheet("""
             QLabel {
@@ -202,9 +210,41 @@ class MainWindow(QMainWindow):
                 text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);  /* Đổ bóng */
             }
         """)
-
+        
+        
         # Đặt tọa độ vị trí hiển thị
-        widget.setGeometry(0, 150, 670, 100)  # Điều chỉnh tọa độ và kích thước theo ý bạn
+        widget.setGeometry(00, 150, 670, 100)  # Điều chỉnh tọa độ và kích thước theo ý bạn
 
+        #Note
         # Tạo QLabel và đặt các thuộc tính
-        widget1 = QLabel("The program permits users to input CT scan
+        widget1 = QLabel("The program permits users to input CT scan images and forecast whether they exhibit signs of lung cancer.", self.Main)
+        font = widget1.font()
+        font.setPointSize(15)
+        font.setItalic(True)
+        # Đặt màu chữ
+        widget1.setStyleSheet("color: white;")
+        widget1.setFont(font)
+        # Đặt căn chỉnh cho văn bản
+        widget1.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        
+        # Đặt tọa độ vị trí hiển thị
+        widget1.setGeometry(00, 670, 800, 50)  # Điều chỉnh tọa độ và kích thước theo ý bạn
+        
+        self.Main.setLayout(self.Main_Layout)
+        self.Main.show()
+    
+    def show_new_window(self, checked):
+        self.hide()
+    #hàm này được gọi khi nút "Start" được nhấn trong cửa sổ chính
+    #nó tạo một lớp 'AnotherWindow' đẻ hiển thị nó
+        self.w = AnotherWindow()
+        self.w.show()
+
+
+app = QApplication(sys.argv)
+#app.setStyleSheet(stylesheet)
+
+window = MainWindow()
+window.show()
+
+app.exec()
