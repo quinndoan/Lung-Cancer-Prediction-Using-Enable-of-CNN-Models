@@ -9,63 +9,6 @@ import numpy as np
 from pathlib import Path
 from keras.models import load_model
 
-def make_predictions(image_path):
-    # Preprocess image
-    try:
-        img = load_img(image_path, target_size=(256, 256))
-        img_array = img_to_array(img)
-        scaled_img_array = img_array / 255.0
-    except FileNotFoundError:
-        print(f"Error: File not found: {image_path}")
-        return None  # Hoặc xử lý lỗi theo cách khác
-
-    # Load models
-    model_path1 = 'models/imageclassifier1.keras'
-    model_path2 = 'models/imageclassifier2.keras'
-    model_path3 = 'models/imageclassifier3.keras'
-    try:
-        model1 = load_model(model_path1)
-        model2 = load_model(model_path2)
-        model3 = load_model(model_path3)
-    except FileNotFoundError:
-        print("Error: Model file not found.")
-        return None  # Hoặc xử lý lỗi theo cách khác
-
-    # Make predictions (tối ưu hóa bằng vectorization)
-    predictions1 = model1.predict(np.array([scaled_img_array]))
-    predictions2 = model2.predict(np.array([scaled_img_array]))
-    predictions3 = model3.predict(np.array([scaled_img_array]))
-
-    # Calculate scores (using NumPy vectorization)
-    RC1 = 2 * (1 - np.power(2, predictions1[0] - 1))
-    RC2 = 2 * (1 - np.power(2, predictions2[0] - 1))
-    RC3 = 2 * (1 - np.power(2, predictions3[0] - 1))
-    FRS = RC1 + RC2 + RC3
-    CCFS = 1 - (1/3 * (predictions1[0] + predictions2[0] + predictions3[0]))
-    FDS = FRS * CCFS
-
-    # Find the index of the highest value in FDS
-    min_index = np.argmin(FDS)  # Use np.argmin() for finding the minimum index
-
-    return min_index
-
-def alert(message:str, parent=None):#dc định nghĩa để hiện thị cửa sổ cho người dùng
-	dlg = QMessageBox(parent)
-	dlg.setWindowTitle("Message from the Application")
-	dlg.setText(message)
-	dlg.exec()
-
-# class AboutDlg(QDialog):
-# #Hiển thị thông tin bổ sung về ứng dụng
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-#         self.setWindowTitle("Additional Information")
-#         self.setFixedSize(1100,600)
-#         manual=QLabel(self)
-#         about_text=f'The program permits users to input CT scan images and forecast whether they exhibit signs of lung cancer'
-#         manual.setText(about_text)
-#         manual.show()
-        
 class AnotherWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -133,42 +76,11 @@ class AnotherWindow(QWidget):
         # Đặt tỷ lệ co giãn cho hai phần bằng nhau
         self.main_layout.setStretch(0, 1)  # Phần bên trái
         self.main_layout.setStretch(1, 1)  # Phần bên phải
-    def get_image_from_file(self):
-        dialog = QFileDialog(self)
-        dialog.setDirectory(str(Path('./')))
-        dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
-        dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
-        dialog.setViewMode(QFileDialog.ViewMode.List)
-        if dialog.exec():
-            filenames = dialog.selectedFiles()
-            if filenames:
-                self.filenames = filenames  # Lưu trữ danh sách file
-                for filename in filenames:
-                    pixmap = QPixmap(filename)
-                    if not pixmap.isNull():
-                        image_label = QLabel(self.image_area)
-                        image_label.setPixmap(pixmap)
-                        image_label.setScaledContents(True)
-                        self.image_layout.addWidget(image_label)
-                    else:
-                        print("Error: Failed to load image:", filename)
-        return
 
-    # def predict(self):
-    #     self.predicted = True
-        
-    #     self.infor_outputs = make_predictions(self.filenames)
-    #     assert len(self.filenames) == len(self.infor_outputs)
-
-    #     # Hiển thị kết quả dự đoán
-    #     for i in range(len(self.filenames)):
-    #         if self.infor_outputs[i] == 0:
-    #             self.OutputList_area_layout.addWidget(QLabel(f'{self.filenames[i]}  -  Không có dấu hiệu ung thư phổi'))
-    #         elif self.infor_outputs[i] == 1:
-    #             self.OutputList_area_layout.addWidget(QLabel(f'{self.filenames[i]}  -  Có dấu hiệu nghi ngờ ung thư phổi'))
-    #         else:
-    #             self.OutputList_area_layout.addWidget(QLabel(f'{self.filenames[i]}  -  Có dấu hiệu ung thư phổi'))
-    #     self.OutputList_scroll_area.update()
+        # Load models once when the window is initialized
+        self.model1 = load_model('models/imageclassifier1.keras')
+        self.model2 = load_model('models/imageclassifier2.keras')
+        self.model3 = load_model('models/imageclassifier3.keras')
 
     def get_image_from_file(self):
         dialog = QFileDialog(self)
@@ -197,7 +109,7 @@ class AnotherWindow(QWidget):
         # Call make_predictions() to generate predictions
         self.infor_outputs = []  # Initialize an empty list
         for filename in self.filenames:
-            index = make_predictions(filename)
+            index = self.make_predictions(filename)
             self.infor_outputs.append(index)
 
         assert len(self.filenames) == len(self.infor_outputs)
@@ -206,14 +118,43 @@ class AnotherWindow(QWidget):
         for i in range(len(self.filenames)):
             index = self.infor_outputs[i]
             if index == 0:
-                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be Bengin.'))
+                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be Benign.'))
             elif index == 1:
-                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be Malginant.'))
+                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be Malignant.'))
             elif index == 2:
-                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be normal.'))
+                self.OutputList_area_layout.addWidget(QLabel(f' The image is predicted to be Normal.'))
             else:
                 self.OutputList_area_layout.addWidget(QLabel(f' Invalid prediction.'))
         self.OutputList_scroll_area.update()
+
+    def make_predictions(self, image_path):
+        # Preprocess image
+        try:
+            img = load_img(image_path, target_size=(256, 256))
+            img_array = img_to_array(img)
+            scaled_img_array = img_array / 255.0
+        except FileNotFoundError:
+            print(f"Error: File not found: {image_path}")
+            return None  # Hoặc xử lý lỗi theo cách khác
+
+        # Make predictions (tối ưu hóa bằng vectorization)
+        predictions1 = self.model1.predict(np.array([scaled_img_array]))
+        predictions2 = self.model2.predict(np.array([scaled_img_array]))
+        predictions3 = self.model3.predict(np.array([scaled_img_array]))
+
+        # Calculate scores (using NumPy vectorization)
+        RC1 = 2 * (1 - np.power(2, predictions1[0] - 1))
+        RC2 = 2 * (1 - np.power(2, predictions2[0] - 1))
+        RC3 = 2 * (1 - np.power(2, predictions3[0] - 1))
+        FRS = RC1 + RC2 + RC3
+        CCFS = 1 - (1/3 * (predictions1[0] + predictions2[0] + predictions3[0]))
+        FDS = FRS * CCFS
+
+        # Find the index of the highest value in FDS
+        min_index = np.argmin(FDS)  # Use np.argmin() for finding the minimum index
+
+        return min_index
+
 class MainWindow(QMainWindow):
 #Lớp này đại diện cho cửa sổ chính ba đầu của ứng dụng
 #trong lớp này, mọt hình ảnh của phổi (là hình ảnh mẫu) được hiển thị
@@ -240,7 +181,7 @@ class MainWindow(QMainWindow):
         self.Main_Layout = QVBoxLayout()
 
         self.button = QPushButton("Start")
-        #nút "Starr" để mở cửa sổ khác 'AnotherWindow' khi được nhân
+        #nút "Start" để mở cửa sổ khác 'AnotherWindow' khi được nhấn
         #khi người dùng nhấn vào nút "Start", một cửa sổ mới sẽ hiển thị, cho phép họ thêm hình ảnh và thực hiện dự đoán
         self.button.setCheckable(True)
         self.button.setGeometry(150,50,600,400)
