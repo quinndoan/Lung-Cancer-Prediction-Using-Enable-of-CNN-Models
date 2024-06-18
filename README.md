@@ -1,11 +1,11 @@
 # Lung Cancer Prediction using Fuzzy function and Pre-trained Models
 
 ## Contributors
-1. @quinndoan : data processing, design and evaluate models
+1. @ quinndoan : data processing, design and evaluate models
 
-2. @Ttdne : data processing, train and write fuzzy Mitcherlich function
+2. @ Ttdne : data processing, train and write fuzzy Mitcherlich function
 
-3. @thaoduong : GUI
+3. @ thaoduong : GUI
    
 
 
