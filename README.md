@@ -1,19 +1,13 @@
-# MENet A Mitscherlich Function based Ensemble of CNN Models to Classify Lung Cancer using CT Scans
+# Lung Cancer Prediction using Fuzzy function and Pre-trained Models
 
-## Abstract
-Lung cancer is one of the leading causes of cancer-related deaths worldwide. To reduce the mortality rate, early detection and proper treatment should be ensured. Computer-aided diagnosis methods analyze different modalities of medical images to increase diagnostic precision. In this paper, we propose an ensemble model, called the Mitscherlich function-based Ensemble Network (MENet), which combines the prediction probabilities obtained from three deep learning models, namely Xception, InceptionResNetV2, and MobileNetV2, to improve the accuracy of a lung cancer prediction model. The ensemble approach is based on the Mitscherlich function, which produces a fuzzy rank to combine the outputs of the said base classifiers. The proposed method is trained and tested on the two publicly available lung cancer datasets, namely Iraq-Oncology Teaching Hospital/National Center for Cancer Diseases (IQ-OTH/NCCD) and LIDC-IDRI, both of these are computed tomography (CT) scan datasets. The obtained results in terms of some standard metrics show that the proposed method performs better than state-of-the-art methods. 
+## Contributors
+1. @quinndoan : data processing, design and evaluate models
 
+2. @Ttdne : data processing, train and write fuzzy Mitcherlich function
 
-## Contribution
-1. We propose an ensemble model, called MENet, for lung cancer classification using CT scans.
-
-2. MENet combines confidence scores obtained from three transfer learning-based CNN models, namely Xception, InceptionResNetV2, and MobileNetV2.
-
-3. We also propose a fuzzy ranking system based on the Mitscherlich function to rank and combine the outputs of different base classifiers for forming an ensemble-based prediction model.
+3. @thaoduong : GUI
    
-4. Our proposed method is trained and tested on two publicly available lung CT scan datasets, namely IQ-OTHNCCD and LIDC-IDRI.
 
-5. MENet outperforms the existing results in lung cancer prediction with an accuracy of 99.54% and 95.75% on IQ-OTHNCCD and LIDC-IDRI datasets, respectively.
 
 ## Citation
 If you're using this article or code in your research or applications, please consider citing using this BibTeX:
